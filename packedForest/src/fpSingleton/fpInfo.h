@@ -33,10 +33,13 @@ namespace fp {
 			// For Structured-RerF
 			int imageHeight;
 			int imageWidth;
+			int imageDepth;
 			int patchHeightMin;
 			int patchHeightMax;
+			int patchDepthMax;
 			int patchWidthMin;
 			int patchWidthMax;
+			int patchDepthMin;
 
 			int numberOfNodes;
 			int maxDepth;
@@ -72,7 +75,7 @@ namespace fp {
 				numberOfNodes=0;
 				maxDepth=std::numeric_limits<int>::max();
 				sumLeafNodeDepths=0;
-				fractionOfFeaturesToTest=-1.0; 
+				fractionOfFeaturesToTest=-1.0;
 				binSize=0;
 				numCores=1;
 				seed=-1;
@@ -80,10 +83,13 @@ namespace fp {
 				methodToUse = 1; // Should this default to 1?
 				imageHeight = 0;
 				imageWidth = 0;
+				imageDepth = 0;
 				patchHeightMin = 0;
 				patchHeightMax = 0;
+				patchDepthMax = 0;
 				patchWidthMin = 0;
 				patchWidthMax = 0;
+				patchDepthMin = 0;
 				forestType.clear();
 				CSVFileName.clear();
 				//initRandom();
@@ -132,7 +138,7 @@ namespace fp {
 			inline int returnMaxDepth() const{
 				return maxDepth;
 			}
-		
+
 			inline int returnNumFeatures() const{
 				return numFeatures;
 			}
@@ -205,22 +211,33 @@ namespace fp {
 			  return imageWidth;
 			}
 
-			inline int returnPatchHeightMax(){
-			  return patchHeightMax;
+			inline int returnImageDepth(){
+			  return imageDepth;
 			}
 
-			inline int returnPatchHeightMin(){
-			  return patchHeightMin;
+			inline int returnPatchHeightMax(){
+			  return patchHeightMax;
 			}
 
 			inline int returnPatchWidthMax(){
 			  return patchWidthMax;
 			}
 
+			inline int returnPatchDepthMax(){
+			  return patchDepthMax;
+			}
+
+			inline int returnPatchHeightMin(){
+			  return patchHeightMin;
+			}
+
 			inline int returnPatchWidthMin(){
 			  return patchWidthMin;
 			}
 
+			inline int returnPatchDepthMin(){
+			  return patchDepthMin;
+			}
 
 			////////////////////////////////////////
 			//Random Number Generator
@@ -331,14 +348,20 @@ namespace fp {
 					imageHeight = parameterValue;
 				}else if(parameterName == "imageWidth"){
 					imageWidth = parameterValue;
+				}else if(parameterName == "imageDepth"){
+					imageDepth = parameterValue;
 				}else if(parameterName == "patchHeightMax"){
 					patchHeightMax = parameterValue;
-				}else if(parameterName == "patchHeightMin"){
-					patchHeightMin = parameterValue;
 				}else if(parameterName == "patchWidthMax"){
 					patchWidthMax = parameterValue;
+				}else if(parameterName == "patchDepthMax"){
+					patchDepthMax = parameterValue;
+				}else if(parameterName == "patchHeightMin"){
+					patchHeightMin = parameterValue;
 				}else if(parameterName == "patchWidthMin"){
 					patchWidthMin = parameterValue;
+				}else if(parameterName == "patchDepthMin"){
+					patchDepthMin = parameterValue;
 				}else {
 					throw std::runtime_error("Unknown parameter type.(int)");
 				}
@@ -366,10 +389,13 @@ namespace fp {
 				if(methodToUse == 2){
 					std::cout << "imageHeight -> " << imageHeight << "\n";
 					std::cout << "imageWidth -> " << imageWidth << "\n";
+					std::cout << "imageDepth -> " << imageDepth << "\n";
 					std::cout << "patchHeightMax -> " << patchHeightMax << "\n";
-					std::cout << "patchHeightMin -> " << patchHeightMin << "\n";
 					std::cout << "patchWidthMax -> " << patchWidthMax << "\n";
+					std::cout << "patchDepthMax -> " << patchDepthMax << "\n";
+					std::cout << "patchHeightMin -> " << patchHeightMin << "\n";
 					std::cout << "patchWidthMin -> " << patchWidthMin << "\n";
+					std::cout << "patchDepthMin -> " << patchDepthMin << "\n";
 				}
 			}
 

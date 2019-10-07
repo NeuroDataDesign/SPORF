@@ -87,7 +87,9 @@ class rerfClassifier(BaseEstimator, ClassifierMixin):
     image_height : int, optional (default=None)
         S-RerF required parameter. Image height of each observation.
     image_width : int, optional (default=None)
-        S-RerF required parameter. Width of each observation.
+        S-RerF required parameter. Image width of each observation.
+    image_depth : int, optional (default=None)
+        S-Rerf required parameter. Image depth of each observation.
     patch_height_max : int, optional (default=max(2, floor(sqrt(image_height))))
         S-RerF parameter. Maximum image patch height to randomly select from.
         If None, set to ``max(2, floor(sqrt(image_height)))``.
@@ -97,7 +99,12 @@ class rerfClassifier(BaseEstimator, ClassifierMixin):
         S-RerF parameter. Maximum image patch width to randomly select from.
         If None, set to ``max(2, floor(sqrt(image_width)))``.
     patch_width_min : int, optional (default=1)
-        S-RerF parameter. Minimum image patch height to randomly select from.
+        S-RerF parameter. Minimum image patch width to randomly select from.
+    patch_depth_max : int, optional (default=max(2, floor(sqrt(image_depth))))
+        S-RerF parameter. Maximum image patch depth to randomly select from.
+        If None, set to ``max(2, floor(sqrt(image_depth)))``.
+    patch_depth_min : int, optional (default=1)
+        S-RerF parameter. Minimum image patch depth to randomly select from.
 
     Returns
     -------
@@ -147,10 +154,13 @@ class rerfClassifier(BaseEstimator, ClassifierMixin):
         random_state=None,
         image_height=None,
         image_width=None,
+        image_depth=None,
         patch_height_max=None,
         patch_height_min=1,
         patch_width_max=None,
         patch_width_min=1,
+        patch_depth_max=None,
+        patch_depth_min=1,
     ):
         self.projection_matrix = projection_matrix
         self.n_estimators = n_estimators
@@ -165,10 +175,13 @@ class rerfClassifier(BaseEstimator, ClassifierMixin):
         # s-rerf params
         self.image_height = image_height
         self.image_width = image_width
+        self.image_depth = image_depth
         self.patch_height_max = patch_height_max
         self.patch_height_min = patch_height_min
         self.patch_width_max = patch_width_max
         self.patch_width_min = patch_width_min
+        self.patch_depth_max = patch_depth_max
+        self.patch_depth_min = patch_depth_min
 
     def fit(self, X, y):
         """Fit estimator.
@@ -277,6 +290,68 @@ class rerfClassifier(BaseEstimator, ClassifierMixin):
             self.forest_.setParameter("patchHeightMin", self.patch_height_min_)
             self.forest_.setParameter("patchWidthMax", self.patch_width_max_)
             self.forest_.setParameter("patchWidthMin", self.patch_width_min_)
+        elif self.projection_matrix == "S-RerF-3D":
+            if self.oob_score:
+                warn(
+                    "OOB is not currently implemented for the S-RerF-3D"
+                    " algorithm.  Continuing with oob_score = False.",
+                    RuntimeWarning,
+                    stacklevel=2,
+                )
+                self.oob_score = False
+
+            forestType = "binnedBaseTern"  # this should change
+            self.method_to_use_ = 3
+            # Check that image_height and image_width are divisors of
+            # the num_features.  This is the most we can do to
+            # prevent an invalid value being passed in.
+            if (num_features % self.image_height) != 0:
+                raise ValueError("Incorrect image_height given:")
+            else:
+                self.image_height_ = self.image_height
+            self.forest_.setParameter("imageHeight", self.image_height_)
+            if (num_features % self.image_width) != 0:
+                raise ValueError("Incorrect image_width given:")
+            else:
+                self.image_width_ = self.image_width
+            self.forest_.setParameter("imageWidth", self.image_width_)
+            if (num_features % self.image_depth) != 0:
+                raise ValueError("Incorrect image_depth given:")
+            else:
+                self.image_depth_ = self.image_depth
+            self.forest_.setParameter("imageDepth", self.image_depth_)
+            # If patch_height_{min, max} and patch_width_{min, max} are
+            # not set by the user, set them to defaults.
+            if self.patch_height_max is None:
+                self.patch_height_max_ = max(2, floor(sqrt(self.image_height_)))
+            else:
+                self.patch_height_max_ = self.patch_height_max
+            if self.patch_width_max is None:
+                self.patch_width_max_ = max(2, floor(sqrt(self.image_width_)))
+            else:
+                self.patch_width_max_ = self.patch_width_max
+            if self.patch_depth_max is None:
+                self.patch_depth_max_ = max(2, floor(sqrt(self.image_depth_)))
+            else:
+                self.patch_depth_max_ = self.patch_depth_max
+            if 1 <= self.patch_height_min <= self.patch_height_max_:
+                self.patch_height_min_ = self.patch_height_min
+            else:
+                raise ValueError("Incorrect patch_height_min")
+            if 1 <= self.patch_width_min <= self.patch_width_max_:
+                self.patch_width_min_ = self.patch_width_min
+            else:
+                raise ValueError("Incorrect patch_width_min")
+            if 1 <= self.patch_depth_min <= self.patch_depth_max_:
+                self.patch_depth_min_ = self.patch_depth_min
+            else:
+                raise ValueError("Incorrect patch_depth_min")
+            self.forest_.setParameter("patchHeightMax", self.patch_height_max_)
+            self.forest_.setParameter("patchHeightMin", self.patch_height_min_)
+            self.forest_.setParameter("patchWidthMax", self.patch_width_max_)
+            self.forest_.setParameter("patchWidthMin", self.patch_width_min_)
+            self.forest_.setParameter("patchDepthMax", self.patch_depth_max_)
+            self.forest_.setParameter("patchDepthMin", self.patch_depth_min_)
         else:
             raise ValueError("Incorrect projection matrix")
         self.forest_.setParameter("forestType", forestType)

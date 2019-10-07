@@ -81,7 +81,7 @@ namespace fp{
 				inline void calcMtryForNode(std::vector<weightedFeature>& featuresToTry){
 					featuresToTry.resize(fpSingleton::getSingleton().returnMtry());
 					int methodToUse = fpSingleton::getSingleton().returnMethodToUse();
-					assert(methodToUse == 1 || methodToUse == 2);
+					assert(methodToUse == 1 || methodToUse == 2 || methodToUse == 3);
 
 					switch(methodToUse){
 						case 1:{
@@ -90,6 +90,10 @@ namespace fp{
 							}
 						case 2:{
 							randMatImagePatch(featuresToTry, paramsRandMatImagePatch());
+							break;
+							}
+						case 3:{
+							randMatVolumePatch(featuresToTry, paramsRandMatVolumePatch());
 							break;
 							}
 					}
@@ -176,6 +180,81 @@ namespace fp{
 				} // END randMatStructured
 
 
+				inline std::vector<std::vector<int> > paramsRandMatVolumePatch(){
+					// Preset parameters
+					const int& imageHeight = fpSingleton::getSingleton().returnImageHeight();
+					const int& imageWidth = fpSingleton::getSingleton().returnImageWidth();
+					const int& imageDepth = fpSingleton::getSingleton().returnImageDepth();
+
+					const int& patchHeightMax = fpSingleton::getSingleton().returnPatchHeightMax();
+					const int& patchWidthMax  = fpSingleton::getSingleton().returnPatchWidthMax();
+					const int& patchDepthMax  = fpSingleton::getSingleton().returnPatchDepthMax();
+					const int& patchHeightMin = fpSingleton::getSingleton().returnPatchHeightMin();
+					const int& patchWidthMin  = fpSingleton::getSingleton().returnPatchWidthMin();
+					const int& patchDepthMin  = fpSingleton::getSingleton().returnPatchDepthMin();
+
+					// A vector of vectors that specifies the parameters
+					// for each patch: < <Height>, <Width>, <Depth>, <TopLeft> >
+					std::vector<std::vector<int> > heightWidthDepthTop(4, std::vector<int>(fpSingleton::getSingleton().returnMtry()));
+					int deltaH;
+					int deltaW;
+					int deltaD;
+					int topLeftSeed;
+					// The weight is currently hard-coded to 1.
+
+					// Loop over mtry to load random patch dimensions
+					// and top left position.
+					for (int k = 0; k < fpSingleton::getSingleton().returnMtry(); k++){
+
+						heightWidthDepthTop[0][k] = randNum->gen(patchHeightMax - patchHeightMin + 1) + patchHeightMin; //sample from [patchHeightMin, patchHeightMax]
+						heightWidthDepthTop[1][k] = randNum->gen(patchWidthMax - patchWidthMin + 1) +  patchWidthMin;    //sample from [patchWidthMin, patchWidthMax]
+						heightWidthDepthTop[2][k] = randNum->gen(patchDepthMax - patchDepthMin + 1) +  patchDepthMin;    //sample from [patchWidthMin, patchWidthMax]
+						// Using the above, 1-pixel patches are possible ... [JLP]
+
+						// compute the difference between the image dimensions and the current random patch dimensions for sampling
+						deltaH = imageHeight - heightWidthDepthTop[0][k] + 1;
+						deltaW = imageWidth  - heightWidthDepthTop[1][k] + 1;
+						deltaD = imageDepth  - heightWidthDepthTop[2][k] + 1;
+
+						// Sample the top left pixel from the available pixels (due to buffering).
+						topLeftSeed = randNum->gen(deltaH * deltaW);
+						randD = ranNum->gen(deltaD)+1;
+
+						// Convert the top-left-seed value to it's appropriate index in the full image.
+						heightWidthDepthTop[3][k] = ((topLeftSeed % deltaW) + (imageWidth * floor(topLeftSeed / deltaW)))*randD;
+
+						assert((heightWidthDepthTop[3][k] % imageWidth) < deltaW); // check that TopLeft pixel is in the correct column.
+						assert((int)(heightWidthTop[3][k] / imageWidth) < deltaH); // check that TopLeft pixel is in the correct row.
+						assert((int)(heightWidthDepthTop[3][k] / (imageWidth * imageHeight)) < deltaD);// check that TopLeft pixel is in the correct slice.
+					}
+
+					return(heightWidthDepthTop);
+				} // End paramsRandMatVolumePatch
+
+
+				inline void randMatVolumePatch(std::vector<weightedFeature>& featuresToTry, std::vector<std::vector<int> > patchPositions){
+					assert((int)(patchPositions[0].size()) == fpSingleton::getSingleton().returnMtry());
+
+					// Preset parameters
+					const int& imageWidth = fpSingleton::getSingleton().returnImageWidth();
+					const int& imageDepth = fpSingleton::getSingleton().returnImageDepth();
+
+
+					int pixelIndex = -1;
+					for (int k = 0; k < fpSingleton::getSingleton().returnMtry(); k++){
+						for (int row = 0; row < patchPositions[0][k]; row++) {
+							for (int col = 0; col < patchPositions[1][k]; col++) {
+								for (int slice=0; slice < patchPositions[2][k]; slice++) {
+									pixelIndex = patchPositions[3][k] + col + (imageWidth * row) + (imageWidth * imageHeight * slice);
+									featuresToTry[k].returnFeatures().push_back(pixelIndex);
+									featuresToTry[k].returnWeights().push_back(1); // weight hard-coded to 1.
+									}
+								}
+						} // Could possibly turn this into one for-loop somehow later. [JLP]
+					}
+				} // END randMatStructured
+
+
 				inline void resetLeftNode(){
 					propertiesOfLeftNode.resetClassTotals();
 				}
@@ -223,8 +302,8 @@ namespace fp{
 					typename std::vector<zipClassAndValue<int,T> >::iterator zipIterator = zipIters.returnZipBegin();
 					for(int classNum = 0; classNum < fpSingleton::getSingleton().returnNumClasses(); ++classNum){
 
-						int sizeToPrefetch = globalPrefetchSize;            
-						if(nodeIndices.returnEndIterator(classNum) - nodeIndices.returnBeginIterator(classNum) < 32){ 
+						int sizeToPrefetch = globalPrefetchSize;
+						if(nodeIndices.returnEndIterator(classNum) - nodeIndices.returnBeginIterator(classNum) < 32){
 							sizeToPrefetch = nodeIndices.returnEndIterator(classNum) - nodeIndices.returnBeginIterator(classNum);
 						}
 
@@ -243,7 +322,7 @@ namespace fp{
 							++zipIterator;
 						}
 
-					}	
+					}
 				}
 
 
@@ -255,8 +334,8 @@ namespace fp{
 
 					for(int classNum = 0; classNum < fpSingleton::getSingleton().returnNumClasses(); ++classNum){
 
-						int sizeToPrefetch = globalPrefetchSize;            
-						if(nodeIndices.returnEndIterator(classNum) - nodeIndices.returnBeginIterator(classNum) < 32){ 
+						int sizeToPrefetch = globalPrefetchSize;
+						if(nodeIndices.returnEndIterator(classNum) - nodeIndices.returnBeginIterator(classNum) < 32){
 							sizeToPrefetch = nodeIndices.returnEndIterator(classNum) - nodeIndices.returnBeginIterator(classNum);
 						}
 
@@ -297,8 +376,8 @@ namespace fp{
 
 					for(int classNum = 0; classNum < fpSingleton::getSingleton().returnNumClasses(); ++classNum){
 
-						int sizeToPrefetch = globalPrefetchSize;            
-						if(nodeIndices.returnEndIterator(classNum) - nodeIndices.returnBeginIterator(classNum) < 32){ 
+						int sizeToPrefetch = globalPrefetchSize;
+						if(nodeIndices.returnEndIterator(classNum) - nodeIndices.returnBeginIterator(classNum) < 32){
 							sizeToPrefetch = nodeIndices.returnEndIterator(classNum) - nodeIndices.returnBeginIterator(classNum);
 						}
 
@@ -370,7 +449,7 @@ namespace fp{
 						std::vector<int>::iterator  higherValueIndices = nodeIndices.returnEndIterator(i);
 						std::vector<int>::iterator  smallerNumberIndex = nodeIndices.returnBeginIterator(i);
 
-						T aggregator;	
+						T aggregator;
 						for(; lowerValueIndices < higherValueIndices; ++lowerValueIndices){
 							aggregator = 0;
 							for(auto i : fMtry){
@@ -393,7 +472,7 @@ namespace fp{
 						std::vector<int>::iterator  higherValueIndices = nodeIndices.returnEndIterator(i);
 						std::vector<int>::iterator  smallerNumberIndex = nodeIndices.returnBeginIterator(i);
 
-						T aggregator;	
+						T aggregator;
 						int weightNum;
 						for(; lowerValueIndices < higherValueIndices; ++lowerValueIndices){
 							aggregator = 0;
@@ -423,7 +502,7 @@ namespace fp{
 			public:
 
 				processingNodeBin(int tr, int pN, int d, randomNumberRerFMWC& randNumBin): treeNum(tr), parentNodeNumber(pN), depth(d), propertiesOfThisNode(fpSingleton::getSingleton().returnNumClasses()), propertiesOfLeftNode(fpSingleton::getSingleton().returnNumClasses()),propertiesOfRightNode(fpSingleton::getSingleton().returnNumClasses()),nodeIndices(fpSingleton::getSingleton().returnNumClasses()){
-					randNum = &randNumBin;	
+					randNum = &randNumBin;
 				}
 
 
@@ -472,7 +551,7 @@ namespace fp{
 				}
 
 				inline bool impurityImproved(){
-					return bestSplit.returnImpurity() < propertiesOfThisNode.returnImpurity();  
+					return bestSplit.returnImpurity() < propertiesOfThisNode.returnImpurity();
 				}
 
 

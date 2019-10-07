@@ -234,20 +234,32 @@ namespace fp {
 			  return fpForestInfo.returnImageWidth();
 			}
 
-			inline int returnPatchHeightMax(){
-			  return fpForestInfo.returnPatchHeightMax();
+			inline int returnImageDepth(){
+			  return fpForestInfo.returnImageDepth();
 			}
 
-			inline int returnPatchHeightMin(){
-			  return fpForestInfo.returnPatchHeightMin();
+			inline int returnPatchHeightMax(){
+			  return fpForestInfo.returnPatchHeightMax();
 			}
 
 			inline int returnPatchWidthMax(){
 			  return fpForestInfo.returnPatchWidthMax();
 			}
 
+			inline int returnPatchDepthMax(){
+			  return fpForestInfo.returnPatchDepthMax();
+			}
+
+			inline int returnPatchHeightMin(){
+			  return fpForestInfo.returnPatchHeightMin();
+			}
+
 			inline int returnPatchWidthMin(){
 			  return fpForestInfo.returnPatchWidthMin();
+			}
+
+			inline int returnPatchDepthMin(){
+			  return fpForestInfo.returnPatchDepthMin();
 			}
 
 
