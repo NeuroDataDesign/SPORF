@@ -190,7 +190,7 @@ namespace fp {
 
 			inline void checkDataDependentParameters(){
 				// For Structured RerF
-				if(fpForestInfo.returnMethodToUse() == 2){
+				if(fpForestInfo.returnMethodToUse() >= 2){
 					if((fpSingleton::getSingleton().returnNumFeatures() % fpSingleton::getSingleton().returnImageHeight()) != 0){
 						throw std::runtime_error("Specified image height is not a multiple of the number of features." );
 					}
@@ -214,6 +214,20 @@ namespace fp {
 					}
 					if(fpSingleton::getSingleton().returnPatchWidthMin() <= 0){
 						throw std::runtime_error("Specified patchWidthMin is <= 0." );
+					}
+				}
+				if(fpForestInfo.returnMethodToUse() == 3){
+					if((fpSingleton::getSingleton().returnNumFeatures() % fpSingleton::getSingleton().returnImageDepth()) != 0){
+						throw std::runtime_error("Specified image width is not a multiple of the number of features." );
+					}
+					if(fpSingleton::getSingleton().returnPatchDepthMax() < fpSingleton::getSingleton().returnPatchDepthMin()){
+						throw std::runtime_error("Specified patchDepthMax is less than patchDepthMin." );
+					}
+					if(fpSingleton::getSingleton().returnPatchDepthMax() > fpSingleton::getSingleton().returnImageDepth()){
+						throw std::runtime_error("Specified patchDepthMax is greater than the image depth." );
+					}
+					if(fpSingleton::getSingleton().returnPatchDepthMin() <= 0){
+						throw std::runtime_error("Specified patchDepthMin is <= 0." );
 					}
 				}
 			}

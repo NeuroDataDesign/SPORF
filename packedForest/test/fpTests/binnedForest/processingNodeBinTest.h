@@ -162,6 +162,75 @@ TEST(processingNodeBinTest, checkStructuredRerF_2d)
 	}
 }
 
+TEST(processingNodeBinTest, checkStructuredRerF_3d)
+{
+	std::srand(std::time(0));
+	std::string p1 = "CSVFileName";
+	std::string p2 = "../res/cifar01.csv";
+	fpSingleton::getSingleton().setParameter(p1, p2);
+	fpSingleton::getSingleton().setParameter("mtry", 1);
+	fpSingleton::getSingleton().setParameter("methodToUse", 3);
+	fpSingleton::getSingleton().setParameter("imageHeight", 32);
+	fpSingleton::getSingleton().setParameter("imageWidth", 32);
+	fpSingleton::getSingleton().setParameter("imageDepth", 3);
+	fpSingleton::getSingleton().setParameter("patchHeightMax", 32);
+	fpSingleton::getSingleton().setParameter("patchHeightMin", 1);
+	fpSingleton::getSingleton().setParameter("patchWidthMax", 32);
+	fpSingleton::getSingleton().setParameter("patchWidthMin", 1);
+	fpSingleton::getSingleton().setParameter("patchDepthMax", 3);
+	fpSingleton::getSingleton().setParameter("patchDepthMin", 1);
+	std::cout << "Loading CIFAR data: " << std::endl;
+	fpSingleton::getSingleton().loadData();
+	fpSingleton::getSingleton().setDataDependentParameters();
+	fpSingleton::getSingleton().checkDataDependentParameters();
+
+	int numFeatures = fpSingleton::getSingleton().returnNumFeatures();
+
+	std::vector<weightedFeature> wf;
+	randomNumberRerFMWC randNumGen;
+	processingNodeBin<double, weightedFeature> procNB(1, 1, 1, randNumGen);
+
+	// Get the 32x32x3 patch at the top left and make sure we don't fall
+	// off the edge.
+	wf.resize(fpSingleton::getSingleton().returnMtry());
+	EXPECT_EQ((int)wf.size(), fpSingleton::getSingleton().returnMtry());
+
+	const std::vector<std::vector<int> > patchParams { {32}, {32}, {3}, {0} } ;
+	procNB.randMatVolumePatchTest(wf, patchParams);
+
+	int groundTruthPixelIndex = 0;
+	for (auto i : wf) {
+		for (auto j : i.returnFeatures()) {
+			EXPECT_EQ(j, groundTruthPixelIndex++);
+		}
+	}
+
+	// Get the 5x5x2 patch on the lower right edge of the image.
+    // (32*32) + (32*27) + 27 = 1915
+	// check that we don't fall off the edge.
+	std::vector<weightedFeature> wf2;
+	wf2.resize(fpSingleton::getSingleton().returnMtry());
+	const std::vector<std::vector<int> > patchParams2 { {5}, {5}, {2}, {1915} };
+	procNB.randMatVolumePatchTest(wf2, patchParams2);
+
+	std::vector<int> groundTruth {1915, 1916, 1917, 1918, 1919,
+                                  1947, 1948, 1949, 1950, 1951,
+                                  1979, 1980, 1981, 1982, 1983,
+                                  2011, 2012, 2013, 2014, 2015,
+                                  2043, 2044, 2045, 2046, 2047,
+                                  2939, 2940, 2941, 2942, 2943,//slice 2
+                                  2971, 2972, 2973, 2974, 2975,
+                                  3003, 3004, 3005, 3006, 3007,
+                                  3035, 3036, 3037, 3038, 3039,
+                                  3067, 3068, 3069, 3070, 3071};
+
+	int count = 0;
+	for (auto i : wf2) {
+		for (auto j : i.returnFeatures()) {
+			EXPECT_EQ(j, groundTruth[count++]);
+		}
+	}
+}
 
 TEST(processingNodeBinTest, paramRandMatImagePatch_Test)
 {
