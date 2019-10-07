@@ -719,6 +719,14 @@ namespace fp{
 				inline void randMatImagePatchTest(std::vector<weightedFeature>& featuresToTry, std::vector<std::vector<int> > patchPositions){
 					return(randMatImagePatch(featuresToTry, patchPositions));
 				}
+
+				inline std::vector<std::vector<int> > paramsRandMatVolumePatchTest(){
+					return(paramsRandMatVolumePatch());
+				}
+
+				inline void randMatVolumePatchTest(std::vector<weightedFeature>& featuresToTry, std::vector<std::vector<int> > patchPositions){
+					return(randMatVolumePatch(featuresToTry, patchPositions));
+				}
 };
 
 }//namespace fp

@@ -41,10 +41,10 @@ class rerfClassifier(BaseEstimator, ClassifierMixin):
     Parameters
     ----------
     projection_matrix : str, optional (default: "RerF")
-        The random combination of features to use: either "RerF", "Base", or
-        "S-RerF".  "RerF" randomly combines features for each `mtry`. Base
-        is our implementation of Random Forest. "S-RerF" is structured RerF,
-        combining multiple features together in random patches.
+        The random combination of features to use: either "RerF", "Base",
+        "S-RerF", or "S-RerF-3D". "RerF" randomly combines features for each
+        `mtry`. Base is our implementation of Random Forest. "S-RerF" is
+        structured RerF, combining multiple features together in random patches.
         See Tomita et al. (2016) [#Tomita]_ for further details.
     n_estimators : int, optional (default: 500)
         Number of trees in forest.
