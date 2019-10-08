@@ -199,6 +199,7 @@ namespace fp{
 					int deltaH;
 					int deltaW;
 					int deltaD;
+					int randD;
 					int topLeftSeed;
 					// The weight is currently hard-coded to 1.
 
@@ -218,13 +219,13 @@ namespace fp{
 
 						// Sample the top left pixel from the available pixels (due to buffering).
 						topLeftSeed = randNum->gen(deltaH * deltaW);
-						randD = ranNum->gen(deltaD)+1;
+						randD = randNum->gen(deltaD)+1;
 
 						// Convert the top-left-seed value to it's appropriate index in the full image.
 						heightWidthDepthTop[3][k] = ((topLeftSeed % deltaW) + (imageWidth * floor(topLeftSeed / deltaW)))*randD;
 
 						assert((heightWidthDepthTop[3][k] % imageWidth) < deltaW); // check that TopLeft pixel is in the correct column.
-						assert((int)(heightWidthTop[3][k] / imageWidth) < deltaH); // check that TopLeft pixel is in the correct row.
+						assert((int)(heightWidthDepthTop[3][k] / imageWidth) < deltaH); // check that TopLeft pixel is in the correct row.
 						assert((int)(heightWidthDepthTop[3][k] / (imageWidth * imageHeight)) < deltaD);// check that TopLeft pixel is in the correct slice.
 					}
 
@@ -236,9 +237,8 @@ namespace fp{
 					assert((int)(patchPositions[0].size()) == fpSingleton::getSingleton().returnMtry());
 
 					// Preset parameters
+					const int& imageHeight = fpSingleton::getSingleton().returnImageHeight();
 					const int& imageWidth = fpSingleton::getSingleton().returnImageWidth();
-					const int& imageDepth = fpSingleton::getSingleton().returnImageDepth();
-
 
 					int pixelIndex = -1;
 					for (int k = 0; k < fpSingleton::getSingleton().returnMtry(); k++){
