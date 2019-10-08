@@ -218,7 +218,7 @@ namespace fp {
 				}
 				if(fpForestInfo.returnMethodToUse() == 3){
 					if((fpSingleton::getSingleton().returnNumFeatures() % fpSingleton::getSingleton().returnImageDepth()) != 0){
-						throw std::runtime_error("Specified image width is not a multiple of the number of features." );
+						throw std::runtime_error("Specified image depth is not a multiple of the number of features." );
 					}
 					if(fpSingleton::getSingleton().returnPatchDepthMax() < fpSingleton::getSingleton().returnPatchDepthMin()){
 						throw std::runtime_error("Specified patchDepthMax is less than patchDepthMin." );

@@ -92,6 +92,22 @@ int main(int argc, char* argv[]) {
                         	case 14:
                                 	forest.setParameter("forestType", "urerf");
                                 	break;
+				case 15:
+					forest.setParameter("forestType", "binnedBaseTern");
+					forest.setParameter("numTreeBins", numCores);
+					forest.setParameter("methodToUse", 3);
+					forest.setParameter("imageHeight", 32);
+					forest.setParameter("imageWidth", 32);
+					forest.setParameter("imageDepth", 3);
+					forest.setParameter("patchHeightMax", 5);
+					forest.setParameter("patchHeightMin", 5);
+					forest.setParameter("patchWidthMax", 5);
+					forest.setParameter("patchWidthMin", 5);
+					forest.setParameter("patchDepthMax", 3);
+					forest.setParameter("patchDepthMin", 3);
+					std::cout << "\nForcing dataset to be CIFAR:\n";
+					dataSet = 7;
+					break;
 
 				default:
 					std::cout << "unknown alg selected" << std::endl;
@@ -124,6 +140,10 @@ int main(int argc, char* argv[]) {
 				case 6:
 					forest.setParameter("CSVFileName", "../experiments/res/p53.csv");
 					forest.setParameter("columnWithY", 5408);
+					break;
+				case 7:
+					forest.setParameter("CSVFileName", "res/cifar_01.csv");
+					forest.setParameter("columnWithY", 0);
 					break;
 				default:
 					std::cout << "unknown dataset selected" << std::endl;
