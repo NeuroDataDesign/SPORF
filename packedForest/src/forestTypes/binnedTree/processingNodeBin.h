@@ -209,7 +209,7 @@ namespace fp{
 
 						heightWidthDepthTop[0][k] = randNum->gen(patchHeightMax - patchHeightMin + 1) + patchHeightMin; //sample from [patchHeightMin, patchHeightMax]
 						heightWidthDepthTop[1][k] = randNum->gen(patchWidthMax - patchWidthMin + 1) +  patchWidthMin;    //sample from [patchWidthMin, patchWidthMax]
-						heightWidthDepthTop[2][k] = randNum->gen(patchDepthMax - patchDepthMin + 1) +  patchDepthMin;    //sample from [patchWidthMin, patchWidthMax]
+						heightWidthDepthTop[2][k] = randNum->gen(patchDepthMax - patchDepthMin + 1) +  patchDepthMin;    //sample from [patchDepthMin, patchDepthMax]
 						// Using the above, 1-pixel patches are possible ... [JLP]
 
 						// compute the difference between the image dimensions and the current random patch dimensions for sampling
@@ -218,11 +218,11 @@ namespace fp{
 						deltaD = imageDepth  - heightWidthDepthTop[2][k] + 1;
 
 						// Sample the top left pixel from the available pixels (due to buffering).
-						topLeftSeed = randNum->gen(deltaH * deltaW);
-						randD = randNum->gen(deltaD)+1;
+						topLeftSeed = randNum->gen(deltaH * deltaW * deltaD);
 
 						// Convert the top-left-seed value to it's appropriate index in the full image.
-						heightWidthDepthTop[3][k] = ((topLeftSeed % deltaW) + (imageWidth * floor(topLeftSeed / deltaW)))*randD;
+						heightWidthDepthTop[3][k] = (topLeftSeed % deltaW) + (imageWidth * floor(topLeftSeed / deltaW)) \
+									    + (imageWidth * imageHeight * floor(topLeftSeed / (deltaW * deltaH)));
 
 						assert((heightWidthDepthTop[3][k] % imageWidth) < deltaW); // check that TopLeft pixel is in the correct column.
 						assert((int)(heightWidthDepthTop[3][k] / imageWidth) < deltaH); // check that TopLeft pixel is in the correct row.
@@ -242,9 +242,9 @@ namespace fp{
 
 					int pixelIndex = -1;
 					for (int k = 0; k < fpSingleton::getSingleton().returnMtry(); k++){
-						for (int row = 0; row < patchPositions[0][k]; row++) {
-							for (int col = 0; col < patchPositions[1][k]; col++) {
-								for (int slice=0; slice < patchPositions[2][k]; slice++) {
+						for (int slice=0; slice < patchPositions[2][k]; slice++) {
+							for (int row = 0; row < patchPositions[0][k]; row++) {
+								for (int col = 0; col < patchPositions[1][k]; col++) {
 									pixelIndex = patchPositions[3][k] + col + (imageWidth * row) + (imageWidth * imageHeight * slice);
 									featuresToTry[k].returnFeatures().push_back(pixelIndex);
 									featuresToTry[k].returnWeights().push_back(1); // weight hard-coded to 1.
