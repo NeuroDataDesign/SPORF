@@ -148,19 +148,18 @@ def test_s_rerf_3d():
     #blob1 = np.random.multivariate_normal([-1,-1,-1], np.eye((3), 100).reshape(100,-1)
     #X = np.vstack((blob0,blob1))
     #Y = np.array([0]*100 + [1]*100).reshape(-1,1)
-    mat = pd.read_csv("../../packedForest/res/cifar01.csv", header=None).values        
-    X = mat[:,:-1].reshape(200,32,32,3)
+    mat = pd.read_csv("../../packedForest/res/cifar_01.csv", header=None).values        
+    X = mat[:,1:].reshape(200,32,32,3)
     np.swapaxes(X, 1, -1)
-    print(X.shape)
     X = X.reshape(200,-1)
-    Y = mat[:,-1]
+    Y = mat[:,0]
 
     clf = rerfClassifier(
         projection_matrix="S-RerF-3D", image_height=32, image_width=32, image_depth=3, n_estimators=10
     )
     clf.fit(X, Y)
     score = clf.score(X, Y)
-    assert score > 0.75
+    assert score > 0.5
 
     assert hasattr(clf, "image_height")
     assert hasattr(clf, "image_width")
@@ -172,12 +171,15 @@ def test_s_rerf_3d():
     assert hasattr(clf, "patch_height_max")
     assert hasattr(clf, "patch_height_min")
 
-    assert clf.image_height == 8
-    assert clf.image_width == 8
-    assert clf.patch_width_max_ == math.floor(math.sqrt(8))
-    assert clf.patch_width_min_ == 1
-    assert clf.patch_height_max_ == math.floor(math.sqrt(8))
+    assert clf.image_height == 32
+    assert clf.image_width == 32
+    assert clf.image_depth == 3
+    assert clf.patch_height_max_ == math.floor(math.sqrt(32))
     assert clf.patch_height_min_ == 1
+    assert clf.patch_width_max_ == math.floor(math.sqrt(32))
+    assert clf.patch_width_min_ == 1
+    assert clf.patch_depth_max_ == 2
+    assert clf.patch_depth_min_ == 1
 
 
 def check_iris_criterion(projection_matrix):

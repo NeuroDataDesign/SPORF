@@ -199,7 +199,6 @@ namespace fp{
 					int deltaH;
 					int deltaW;
 					int deltaD;
-					int randD;
 					int topLeftSeed;
 					// The weight is currently hard-coded to 1.
 
