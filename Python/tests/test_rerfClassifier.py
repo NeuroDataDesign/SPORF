@@ -116,7 +116,7 @@ def test_s_rerf():
     y_train = y[: n // 2]
 
     clf = rerfClassifier(
-        projection_matrix="S-RerF", image_height=8, image_width=8, n_estimators=10
+        projection_matrix="MORF", image_height=8, image_width=8, n_estimators=10
     )
 
     clf.fit(X_train, y_train)
@@ -155,7 +155,7 @@ def test_s_rerf_3d():
     Y = mat[:,0]
 
     clf = rerfClassifier(
-        projection_matrix="S-RerF-3D", image_height=32, image_width=32, image_depth=3, n_estimators=10
+        projection_matrix="MORF-3D", image_height=32, image_width=32, image_depth=3, n_estimators=10
     )
     clf.fit(X, Y)
     score = clf.score(X, Y)

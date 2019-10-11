@@ -42,10 +42,11 @@ class rerfClassifier(BaseEstimator, ClassifierMixin):
     ----------
     projection_matrix : str, optional (default: "RerF")
         The random combination of features to use: either "RerF", "Base",
-        "S-RerF", or "S-RerF-3D". "RerF" randomly combines features for each
-        `mtry`. Base is our implementation of Random Forest. "S-RerF" is
+        "MORF", or "MORF-3D". "RerF" randomly combines features for each
+        `mtry`. Base is our implementation of Random Forest. "MORF" is
         structured RerF, combining multiple features together in random patches.
-        See Tomita et al. (2016) [#Tomita]_ for further details.
+        See Tomita et al. (2016) [#Tomita]_ for further details. "MORF-3D"
+        is the 3 dimensional extension of MORF.
     n_estimators : int, optional (default: 500)
         Number of trees in forest.
 
@@ -85,26 +86,26 @@ class rerfClassifier(BaseEstimator, ClassifierMixin):
         Random seed to use. If None, set seed to ``np.random.randint(1, 1000000)``.
 
     image_height : int, optional (default=None)
-        S-RerF required parameter. Image height of each observation.
+        MORF required parameter. Image height of each observation.
     image_width : int, optional (default=None)
-        S-RerF required parameter. Image width of each observation.
+        MORF required parameter. Image width of each observation.
     image_depth : int, optional (default=None)
-        S-Rerf required parameter. Image depth of each observation.
+        MORF required parameter. Image depth of each observation.
     patch_height_max : int, optional (default=max(2, floor(sqrt(image_height))))
-        S-RerF parameter. Maximum image patch height to randomly select from.
+        MORF parameter. Maximum image patch height to randomly select from.
         If None, set to ``max(2, floor(sqrt(image_height)))``.
     patch_height_min : int, optional (default=1)
-        S-RerF parameter. Minimum image patch height to randomly select from.
+        MORF parameter. Minimum image patch height to randomly select from.
     patch_width_max : int, optional (default=max(2, floor(sqrt(image_width))))
-        S-RerF parameter. Maximum image patch width to randomly select from.
+        MORF parameter. Maximum image patch width to randomly select from.
         If None, set to ``max(2, floor(sqrt(image_width)))``.
     patch_width_min : int, optional (default=1)
-        S-RerF parameter. Minimum image patch width to randomly select from.
+        MORF parameter. Minimum image patch width to randomly select from.
     patch_depth_max : int, optional (default=max(2, floor(sqrt(image_depth))))
-        S-RerF parameter. Maximum image patch depth to randomly select from.
+        MORF parameter. Maximum image patch depth to randomly select from.
         If None, set to ``max(2, floor(sqrt(image_depth)))``.
     patch_depth_min : int, optional (default=1)
-        S-RerF parameter. Minimum image patch depth to randomly select from.
+        MORF parameter. Minimum image patch depth to randomly select from.
 
     Returns
     -------
@@ -243,10 +244,10 @@ class rerfClassifier(BaseEstimator, ClassifierMixin):
             else:
                 forestType = "binnedBaseTern"
             self.method_to_use_ = 1
-        elif self.projection_matrix == "S-RerF":
+        elif self.projection_matrix == "MORF":
             if self.oob_score:
                 warn(
-                    "OOB is not currently implemented for the S-RerF"
+                    "OOB is not currently implemented for the MORF"
                     " algorithm.  Continuing with oob_score = False.",
                     RuntimeWarning,
                     stacklevel=2,
@@ -290,10 +291,10 @@ class rerfClassifier(BaseEstimator, ClassifierMixin):
             self.forest_.setParameter("patchHeightMin", self.patch_height_min_)
             self.forest_.setParameter("patchWidthMax", self.patch_width_max_)
             self.forest_.setParameter("patchWidthMin", self.patch_width_min_)
-        elif self.projection_matrix == "S-RerF-3D":
+        elif self.projection_matrix == "MORF-3D":
             if self.oob_score:
                 warn(
-                    "OOB is not currently implemented for the S-RerF-3D"
+                    "OOB is not currently implemented for the MORF-3D"
                     " algorithm.  Continuing with oob_score = False.",
                     RuntimeWarning,
                     stacklevel=2,
